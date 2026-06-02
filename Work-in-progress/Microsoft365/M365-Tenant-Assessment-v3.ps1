@@ -12,7 +12,7 @@
 .PARAMETER QuickMode
     Runs only Tenant Overview, Licensing, Secure Score, and User Health.
 .EXAMPLE
-    .\M365TenantAssessment.ps1 -CustomerName "Contoso"
+    .\M365-Tenant-Assessment-v3.ps1 -CustomerName "Contoso"
 .EXAMPLE
     .\M365TenantAssessment.ps1 -CustomerName "Fabrikam" -TenantId "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" -QuickMode
 #>
@@ -95,7 +95,7 @@ function Initialize-RequiredModules {
         Import-Module ExchangeOnlineManagement -ErrorAction SilentlyContinue
         Write-Host "  ExchangeOnlineManagement module available" -ForegroundColor Green
     } else {
-        Write-Host "  ExchangeOnlineManagement not found — shared mailbox data will use Graph heuristic" -ForegroundColor Yellow
+        Write-Host "  ExchangeOnlineManagement not found - shared mailbox data will use Graph heuristic" -ForegroundColor Yellow
     }
 }
 
@@ -301,7 +301,7 @@ function Get-M365LicensingInfo {
         $script:Data['UsedLicenses']   = $totalConsumed
         $script:Data['UnusedLicenses'] = $totalAvailable
 
-        Write-Host "  $($licenses.Count) SKUs | $totalConsumed/$totalPurchased consumed | $totalAvailable available ($unusedPct% unused)" -ForegroundColor Green
+        Write-Host ("  {0} SKUs | {1}/{2} consumed | {3} available ({4}% unused)" -f $licenses.Count, $totalConsumed, $totalPurchased, $totalAvailable, $unusedPct) -ForegroundColor Green
 
         $unusedColor  = if ($unusedPct -gt 20) { "#ff8c00" } else { "#107c10" }
         $unusedStatus = if ($unusedPct -gt 20) { "warn" } else { "good" }
@@ -517,6 +517,7 @@ function Get-UserHealth {
                 (New-StatCard "Disabled Accounts" ($users.Count - $enabledMembers.Count - $guestUsers.Count) "#767676") +
                 (New-StatCard "New (30 days)" $newUsers) +
                 (New-StatCard "Inactive (90 days)" $inactive $(if ($inactive -gt 10) { "#ff8c00" } else { "#107c10" })) +
+                (New-StatCard "Global Admins" $globalAdmins $adminColor) +
                 "</div>" +
                 "<h3>Global Administrators ($globalAdmins)</h3>" +
                 (ConvertTo-HtmlTable $gaRows @('Display Name','UPN')) +
@@ -636,7 +637,7 @@ function Get-ExchangeOnlineInfo {
     try {
         Write-Host "  Gathering users with mail addresses..." -ForegroundColor Gray
         $users = Get-MgUser -All -Property DisplayName,Mail,UserPrincipalName,UserType,AccountEnabled,AssignedLicenses |
-                 Where-Object { $_.Mail -ne $null }
+                 Where-Object { $null -ne $_.Mail }
 
         # User mailboxes: enabled Member accounts with licenses
         $userMailboxes = $users | Where-Object {
@@ -737,7 +738,7 @@ function Get-EmailSecurity {
         $domain = $script:Data['PrimaryDomain']
         if (!$domain) {
             Write-Host "  Primary domain not available" -ForegroundColor Yellow
-            Add-HtmlSection "Email Security (DNS)" "<p class='warn-text'>Primary domain not available — skipped.</p>" "warn"
+            Add-HtmlSection "Email Security (DNS)" "<p class='warn-text'>Primary domain not available - skipped.</p>" "warn"
             return
         }
 
@@ -767,7 +768,7 @@ function Get-EmailSecurity {
             }
         } catch { }
 
-        # DKIM — check common selectors
+        # DKIM - check common selectors
         $dkimStatus = 'Not detected'
         foreach ($sel in @('selector1','selector2','google','k1','mail','default')) {
             try {
@@ -808,7 +809,7 @@ function Get-EmailSecurity {
         $warnings = ""
         if (!$hasDMARC) { $warnings += "<p class='warn-text'>DMARC is not enforced. Without p=reject or p=quarantine, spoofed emails from your domain cannot be blocked at recipient servers.</p>" }
         if (!$hasSPF)   { $warnings += "<p class='warn-text'>SPF record not found. Your domain is vulnerable to email spoofing.</p>" }
-        if (!$hasDKIM)  { $warnings += "<p class='warn-text'>DKIM not detected on common selectors. It may be configured on a custom selector — verify in your DNS provider.</p>" }
+        if (!$hasDKIM)  { $warnings += "<p class='warn-text'>DKIM not detected on common selectors. It may be configured on a custom selector - verify in your DNS provider.</p>" }
 
         $html = "<div class='stat-row'>" +
                 (New-StatCard "SPF" $spfStatus $spfColor) +
@@ -1092,7 +1093,7 @@ function Get-CompliancePosture {
         } catch { }
 
         # Check if Purview DLP policies are accessible (requires Compliance admin)
-        $dlpNote = 'Requires Compliance Administrator role — not assessed with Global Reader'
+        $dlpNote = 'Requires Compliance Administrator role - not assessed with Global Reader'
 
         Write-Host "  Sensitivity Labels: $labelCount | Audit Log: $auditStatus" -ForegroundColor Green
 
@@ -1123,7 +1124,7 @@ function Get-CompliancePosture {
 # ═════════════════════════════════════════════════════════════════════════════
 # HTML Report Generator
 # ═════════════════════════════════════════════════════════════════════════════
-function Generate-HtmlReport {
+function New-HtmlReport {
     param([string]$OutputPath)
     Write-Host "`nGenerating HTML report..." -ForegroundColor Cyan
 
@@ -1266,7 +1267,7 @@ Required : Global Reader (minimum)
         Get-CompliancePosture  -OutputPath $outputPath -Total $total
     }
 
-    $reportPath = Generate-HtmlReport -OutputPath $outputPath
+    $reportPath = New-HtmlReport -OutputPath $outputPath
 
     Write-Host "`nDisconnecting..." -ForegroundColor Cyan
     Disconnect-MgGraph -ErrorAction SilentlyContinue

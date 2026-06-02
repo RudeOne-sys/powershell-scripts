@@ -33,7 +33,7 @@ $WorkFolder     = Join-Path $DownloadsPath "_Work"
 $PersonalFolder = Join-Path $DownloadsPath "_Personal"
 $UnclearFolder  = Join-Path $DownloadsPath "_Unclear"
 $LogFile        = Join-Path $DownloadsPath "_classifier_log.txt"
-$Model          = "claude-sonnet-4-20250514"
+$Model          = "claude-sonnet-4-6"
 $BatchSize      = 50      # Files per API call (keeps prompts manageable)
 $MaxLogLines    = 2000    # Trim log file if it grows beyond this
 
@@ -88,10 +88,18 @@ function Get-SafeDestination {
     return $dest
 }
 
+function Remove-Surrogates {
+    param([string]$s)
+    -join ($s.ToCharArray() | ForEach-Object { if ([char]::IsSurrogate($_)) { '?' } else { $_ } })
+}
+
 function Invoke-ClaudeClassify {
     param([string[]]$Filenames)
 
-    $list   = ($Filenames | ForEach-Object { "- $_" }) -join "`n"
+    # Strip surrogate code units (emoji etc.) — ConvertTo-Json encodes them as
+    # surrogate pairs (\uD800-\uDFFF) which the API rejects as invalid UTF-8
+    $safeNames = $Filenames | ForEach-Object { Remove-Surrogates $_ }
+    $list      = ($safeNames | ForEach-Object { "- $_" }) -join "`n"
     $prompt = @"
 You are a file classifier. Classify each filename from a Downloads folder as:
 - "work"     : clearly work/business related — invoices, contracts, proposals, SOWs,
@@ -116,18 +124,27 @@ $list
         messages   = @(@{ role = "user"; content = $prompt })
     } | ConvertTo-Json -Depth 5
 
+    # ConvertTo-Json encodes characters outside the BMP (emoji etc.) as surrogate-pair
+    # escape sequences (\uD800-\uDFFF). The Anthropic API rejects these as invalid UTF-8.
+    # Strip any such sequences from the serialised JSON string.
+    $body = $body -replace '\\u[Dd][89AaBb][0-9A-Fa-f]{2}\\u[Dd][CcDdEeFf][0-9A-Fa-f]{2}', '?'
+    $body = $body -replace '\\u[Dd][89A-Fa-f][0-9A-Fa-f]{2}', '?'
+
     $headers = @{
         "x-api-key"         = $ApiKey
         "anthropic-version" = "2023-06-01"
         "content-type"      = "application/json"
     }
 
+    # Send as explicit UTF-8 bytes — avoids PowerShell 5.1's default ANSI encoding for string bodies
+    $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+
     try {
         $response = Invoke-RestMethod `
             -Uri     "https://api.anthropic.com/v1/messages" `
             -Method  POST `
             -Headers $headers `
-            -Body    $body `
+            -Body    $bodyBytes `
             -ErrorAction Stop
 
         $raw = $response.content[0].text.Trim()
@@ -138,7 +155,14 @@ $list
         return $raw | ConvertFrom-Json
     }
     catch {
-        Write-Log "API call failed: $_" "ERROR"
+        $detail = ""
+        try {
+            $stream = $_.Exception.Response.GetResponseStream()
+            $reader = [System.IO.StreamReader]::new($stream)
+            $detail = " | API response: " + $reader.ReadToEnd()
+            $reader.Close()
+        } catch {}
+        Write-Log "API call failed: $_$detail" "ERROR"
         return $null
     }
 }
@@ -192,7 +216,7 @@ for ($b = 0; $b -lt $batches; $b++) {
     foreach ($r in $results) { $lookup[$r.filename] = $r }
 
     foreach ($file in $batch) {
-        $result = $lookup[$file.Name]
+        $result = $lookup[(Remove-Surrogates $file.Name)]
 
         if (-not $result) {
             Write-Log "No classification returned for: $($file.Name) — moving to _Unclear" "WARN"
