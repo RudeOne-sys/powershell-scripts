@@ -1,0 +1,238 @@
+**********************
+PowerShell transcript start
+Start time: 20250322170442
+Username: NETSURIT\LeeV
+RunAs User: NETSURIT\LeeV
+Configuration Name: 
+Machine: LEEVK-DELL (Microsoft Windows NT 10.0.22631.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll
+Process ID: 17156
+PSVersion: 7.2.24
+PSEdition: Core
+GitCommitId: 7.2.24
+OS: Microsoft Windows 10.0.22631
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.10032.0, 6.0.0, 6.1.0, 6.2.0, 7.0.0, 7.1.0, 7.2.24
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is Get-LargestFiles-output.txt
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Script info
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+ Date: Mar-22-2025 17:04
+ Hostname: LEEVK-DELL
+ Script executed with admin privileges: Yes
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Drive info
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+ Target Drive: C:
+ Capacity: 476 GB
+ Free space:  107 GB / 109 905 MB
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Root Folder Sizes
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+ Please wait, this is going to take a moment...
+
+
+
+Measure-Object: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Get-LargestFiles.ps1:97
+Line |
+  97 |  … ction SilentlyContinue | Measure-Object -Property Length -Sum).Sum 2> …
+     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot process argument because the value of argument "Property" is not valid. Change the value of the "Property" argument and run the operation again.
+
+PS>TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> dir
+
+    Directory: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          2025/03/22    17:35           1335 # Define the directory to search an.ps1
+la---          2023/08/24    22:11          21862 d.jpeg
+la---          2025/03/22    16:19          13414 Find file type.ps1
+la---          2025/03/22    16:57           1033 FolderAge.ps1
+la---          2025/03/22    14:58          62079 Get-DirectorySize.ps1
+la---          2025/03/20    11:44          10977 Get-FileSizes.ps1
+la---          2025/03/20    11:44          26784 Get-FolderAge.ps1
+-a---          2025/03/22    17:34           2530 Get-LargestFiles-output.txt
+la---          2025/03/20    11:44           8189 Get-LargestFiles.ps1
+la---          2025/03/20    11:44           2845 Get-SharesAndPermissions.ps1
+la---          2025/03/20    11:44           5154 largest_file_search.ps1
+la---          2025/03/20    11:44           2188 Orr_Group_File_Share_Assessment_20240925.ps1
+la---          2025/03/20    11:44          26784 Orr_Group_Get_Folder_Age_20240926.ps1
+la---          2025/03/20    16:55              0 PowerShell.exe
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> dir
+
+    Directory: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+la---          2023/08/24    22:11          21862 d.jpeg
+la---          2025/03/22    17:35           1335 Define the directory to search an.ps1
+la---          2025/03/22    16:19          13414 Find file type.ps1
+la---          2025/03/22    16:57           1033 FolderAge.ps1
+la---          2025/03/22    14:58          62079 Get-DirectorySize.ps1
+la---          2025/03/20    11:44          10977 Get-FileSizes.ps1
+la---          2025/03/20    11:44          26784 Get-FolderAge.ps1
+-a---          2025/03/22    17:35           3977 Get-LargestFiles-output.txt
+la---          2025/03/20    11:44           8189 Get-LargestFiles.ps1
+la---          2025/03/20    11:44           2845 Get-SharesAndPermissions.ps1
+la---          2025/03/20    11:44           5154 largest_file_search.ps1
+la---          2025/03/20    11:44           2188 Orr_Group_File_Share_Assessment_20240925.ps1
+la---          2025/03/20    11:44          26784 Orr_Group_Get_Folder_Age_20240926.ps1
+la---          2025/03/20    16:55              0 PowerShell.exe
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> & '.\Define the directory to search an.ps1'
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> & '.\Define the directory to search an.ps1'
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> & '.\Define the directory to search an.ps1'
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> & '.\Define the directory to search an.ps1'
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+Folder size information has been exported to C:\temp\FolderSizesInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> & '.\Define the directory to search an.ps1'
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+Folder size information has been exported to C:\temp\FolderSizesInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-FileSizes.ps1 -outDir "c:\temp" -scanDir "C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\Amaro Foods"
+[INFO] c:\temp already exists.
+[INFO] File size rounding set to 0 decimal places.
+[INFO] Ordering set to FilePath.
+[INFO] Scanning C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\Amaro Foods, please wait...
+[INFO] Saving report file.
+[INFO] Script complete in 0 hours, 0 minutes, 0 seconds.
+[INFO] Results can be found at c:\temp\GetFileSizes_LEEVK-DELL_202503221750.csv
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> dir
+
+    Directory: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+la---          2023/08/24    22:11          21862 d.jpeg
+la---          2025/03/22    17:43           2139 Define the directory to search an.ps1
+la---          2025/03/22    16:19          13414 Find file type.ps1
+la---          2025/03/22    16:57           1033 FolderAge.ps1
+la---          2025/03/22    14:58          62079 Get-DirectorySize.ps1
+la---          2025/03/20    11:44          10977 Get-FileSizes.ps1
+la---          2025/03/20    11:44          26784 Get-FolderAge.ps1
+-a---          2025/03/22    17:50           7451 Get-LargestFiles-output.txt
+la---          2025/03/20    11:44           8189 Get-LargestFiles.ps1
+la---          2025/03/20    11:44           2845 Get-SharesAndPermissions.ps1
+la---          2025/03/20    11:44           5154 largest_file_search.ps1
+la---          2025/03/20    11:44           2188 Orr_Group_File_Share_Assessment_20240925.ps1
+la---          2025/03/20    11:44          26784 Orr_Group_Get_Folder_Age_20240926.ps1
+la---          2025/03/20    16:55              0 PowerShell.exe
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-SharesAndPermissions.ps1 -ExportPath c:Temp
+Checking C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\Amaro Foods
+
+Get-WmiObject: Invalid parameter
+
+Get-WmiObject: Invalid parameter 
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> TerminatingError(Export-Csv): "Could not find a part of the path 'C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Temp\Share_PermissionExport.csv'."
+
+Export-Csv: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Get-SharesAndPermissions.ps1:85
+Line |
+  85 |  Export-Csv -Path $ExportPath\Share_PermissionExport.csv -NoTypeInform …
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Could not find a part of the path 'C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Temp\Share_PermissionExport.csv'.
+
+Export-Csv: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Get-SharesAndPermissions.ps1:85
+Line |
+  85 |  Export-Csv -Path $ExportPath\Share_PermissionExport.csv -NoTypeInform …
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Could not find a part of the path 'C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools\Temp\Share_PermissionExport.csv'.
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-SharesAndPermissions.ps1 -ExportPath c:\Temp
+Checking C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\Amaro Foods
+
+Get-WmiObject: Invalid parameter
+
+Get-WmiObject: Invalid parameter 
+Checking C:\Users\LeeV\OneDrive - Netsurit\Pictures
+
+Get-WmiObject: Invalid parameter
+
+Get-WmiObject: Invalid parameter 
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-SharesAndPermissions.ps1 -ExportPath c:\Temp
+Checking C:\Windows
+
+Get-WmiObject: The RPC server is unavailable.
+
+Get-WmiObject: The RPC server is unavailable.
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-SharesAndPermissions.ps1 -ExportPath c:\Temp
+Checking \\leevk-dell\Temp
+
+Get-WmiObject: Invalid parameter
+
+Get-WmiObject: Invalid parameter 
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\Get-SharesAndPermissions.ps1 -ExportPath c:\Temp
+Checking \\leevk-dell
+
+Get-WmiObject: Invalid parameter
+
+Get-WmiObject: Invalid parameter 
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> dir
+
+    Directory: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+la---          2023/08/24    22:11          21862 d.jpeg
+la---          2025/03/22    17:43           2139 Define the directory to search an.ps1
+la---          2025/03/22    16:19          13414 Find file type.ps1
+la---          2025/03/22    16:57           1033 FolderAge.ps1
+la---          2025/03/22    14:58          62079 Get-DirectorySize.ps1
+la---          2025/03/20    11:44          10977 Get-FileSizes.ps1
+la---          2025/03/20    11:44          26784 Get-FolderAge.ps1
+-a---          2025/03/22    18:03          12013 Get-LargestFiles-output.txt
+la---          2025/03/20    11:44           8189 Get-LargestFiles.ps1
+la---          2025/03/22    17:58           2845 Get-SharesAndPermissions.ps1
+-a---          2025/03/22    18:04           1178 GetPermissions.ps1
+la---          2025/03/20    11:44           5154 largest_file_search.ps1
+la---          2025/03/20    11:44           2188 Orr_Group_File_Share_Assessment_20240925.ps1
+la---          2025/03/20    11:44          26784 Orr_Group_Get_Folder_Age_20240926.ps1
+la---          2025/03/20    16:55              0 PowerShell.exe
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\GetPermissions.ps1
+Permissions information has been exported to C:\temp\PermissionsInfo.csv
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> dir
+
+    Directory: C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+la---          2023/08/24    22:11          21862 d.jpeg
+la---          2025/03/22    16:19          13414 Find file type.ps1
+la---          2025/03/22    16:57           1033 FolderAge.ps1
+la---          2025/03/22    14:58          62079 Get-DirectorySize.ps1
+la---          2025/03/20    11:44          10977 Get-FileSizes.ps1
+la---          2025/03/20    11:44          26784 Get-FolderAge.ps1
+-a---          2025/03/22    18:05          13754 Get-LargestFiles-output.txt
+la---          2025/03/20    11:44           8189 Get-LargestFiles.ps1
+la---          2025/03/22    17:58           2845 Get-SharesAndPermissions.ps1
+la---          2025/03/22    17:43           2139 GetLargeFiles.ps1
+la---          2025/03/22    18:05           1230 GetPermissions.ps1
+la---          2025/03/20    11:44           5154 largest_file_search.ps1
+la---          2025/03/20    11:44           2188 Orr_Group_File_Share_Assessment_20240925.ps1
+la---          2025/03/20    11:44          26784 Orr_Group_Get_Folder_Age_20240926.ps1
+la---          2025/03/20    16:55              0 PowerShell.exe
+
+PS C:\Users\LeeV\OneDrive - Netsurit\Documents\Service Requests\1. SSK\File Server Assessment Tools\File Server Assessment Tools> .\GetLargeFiles.ps1
+Large file information has been exported to C:\temp\LargeFilesInfo.csv
+Folder size information has been exported to C:\temp\FolderSizesInfo.csv

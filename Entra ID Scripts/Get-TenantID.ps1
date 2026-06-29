@@ -1,4 +1,4 @@
-$domain = "yourdomain.com"
+$domain = "Tshipientle.co.za"
 $uri = "https://login.microsoftonline.com/$domain/.well-known/openid-configuration"
 $response = Invoke-RestMethod -Uri $uri -Method Get
 # The tenant ID is in the 'issuer' URL
