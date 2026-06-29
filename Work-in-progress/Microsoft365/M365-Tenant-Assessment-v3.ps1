@@ -19,7 +19,8 @@
 param(
     [string]$CustomerName = "",
     [string]$TenantId = "",
-    [switch]$QuickMode
+    [switch]$QuickMode,
+    [string]$ClientId = ""   # Optional: App Registration client ID for pre-consented delegated access
 )
 
 $ErrorActionPreference = 'Continue'
@@ -137,7 +138,8 @@ function Connect-MicrosoftGraphServices {
 
     try {
         $connectParams = @{ Scopes = $scopes; NoWelcome = $true }
-        if ($TenantId) { $connectParams['TenantId'] = $TenantId }
+        if ($TenantId)  { $connectParams['TenantId']  = $TenantId }
+        if ($ClientId)  { $connectParams['ClientId']  = $ClientId }
         Connect-MgGraph @connectParams
 
         $ctx = Get-MgContext

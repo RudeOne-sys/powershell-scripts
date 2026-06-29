@@ -116,12 +116,105 @@ The customer's Tenant ID can be found in their **Entra admin center → Overview
 
 ---
 
-### Consent Note for New Tenants
+### Consent and App Registration
 
-The first time you run against a tenant, Microsoft will display a consent prompt listing all the permissions the script is requesting. If the account being used is not a tenant admin, an admin may need to grant consent first. Ask the customer's IT admin to either:
+#### Why a custom app registration is needed
 
-- Run the script once themselves so they can approve consent as an admin, or
-- Grant admin consent manually at: **Entra admin center → App registrations → Microsoft Graph PowerShell → API permissions → Grant admin consent**
+The script requests Microsoft Graph permissions that require **admin consent** — a Global Reader account cannot grant them on its own. By default, `Connect-MgGraph` uses the shared "Microsoft Graph Command Line Tools" app, which means granting consent there applies to all PowerShell tools tenant-wide for all users.
+
+The correct approach for assessment use is a **dedicated app registration** in the customer's tenant. This gives you:
+
+- Consent scoped to a single known app rather than the shared Microsoft tooling app
+- All API calls run under the specific assessment account's delegated context (Global Reader role bounds all access — the app cannot do more than the signed-in user is allowed)
+- The app can be locked to **one specific user account** so no other account can authenticate through it
+
+The customer's IT admin completes this once (takes roughly 10 minutes). After that, you can run the script against their tenant without any further consent prompts.
+
+---
+
+#### Step 1 — Create the App Registration
+
+The customer's admin signs in to [entra.microsoft.com](https://entra.microsoft.com) and does the following:
+
+1. Go to **Entra ID → App registrations → New registration**
+2. Fill in the form:
+   - **Name:** `M365 Assessment Tool` (or include your company name, e.g. `M365 Assessment - Contoso MSP`)
+   - **Supported account types:** Accounts in this organizational directory only (Single tenant)
+   - **Redirect URI:** Choose platform **Public client/native (mobile & desktop)** and enter `http://localhost`
+3. Click **Register**
+4. On the app overview page, copy the **Application (client) ID** — you will need this to run the script
+
+---
+
+#### Step 2 — Add the Required API Permissions
+
+Still in the app registration, go to **API permissions → Add a permission → Microsoft Graph → Delegated permissions**.
+
+Search for and add each of the following permissions:
+
+| Permission | Description |
+|---|---|
+| `User.Read.All` | Read all users |
+| `Group.Read.All` | Read all groups |
+| `Sites.Read.All` | Read all SharePoint sites |
+| `TeamSettings.Read.All` | Read Teams settings |
+| `TeamMember.Read.All` | Read Teams membership |
+| `Channel.ReadBasic.All` | Read Teams channel info |
+| `Application.Read.All` | Read app registrations and service principals |
+| `SecurityEvents.Read.All` | Read Secure Score and security events |
+| `Reports.Read.All` | Read usage reports (SharePoint, OneDrive, Teams) |
+| `Directory.Read.All` | Read directory data (roles, domains, etc.) |
+| `MailboxSettings.Read` | Read mailbox settings |
+| `Organization.Read.All` | Read tenant/organisation details |
+| `Policy.Read.All` | Read Conditional Access policies |
+| `RoleManagement.Read.Directory` | Read directory role assignments |
+| `AuditLog.Read.All` | Read audit log |
+| `UserAuthenticationMethod.Read.All` | Read MFA registration data |
+| `InformationProtectionPolicy.Read` | Read sensitivity labels |
+
+> **Important:** All permissions must be added as **Delegated** (not Application). This ensures API calls execute in the context of the signed-in user, bounded by their role.
+
+---
+
+#### Step 3 — Grant Admin Consent
+
+After adding all permissions, click **Grant admin consent for [tenant name]** at the top of the API permissions page.
+
+Confirm the prompt. The status column for each permission should change to a green tick showing **Granted for [tenant]**.
+
+This step is what bypasses the consent prompt at sign-in. The permissions are pre-approved for this specific app. When the assessment account signs in, no consent dialog appears.
+
+---
+
+#### Step 4 — Restrict Access to the Assessment Account Only
+
+This step locks the app so that only the specific account running the script can authenticate through it. Any other user who tries will be blocked.
+
+1. Go to **Entra ID → Enterprise applications** and search for the app name you just created
+2. Open it and go to **Properties**
+3. Set **Assignment required** to **Yes** and click **Save**
+4. Go to **Users and groups → Add user/group**
+5. Select the account that will run the assessment (the Global Reader account) and click **Assign**
+
+The app will now reject sign-in attempts from any account that is not explicitly assigned.
+
+---
+
+#### Step 5 — Run the Script with the Client ID
+
+Pass the Application (client) ID from Step 1 using the `-ClientId` parameter:
+
+```powershell
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Contoso" -ClientId "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+
+Or combined with `-TenantId` for external tenants:
+
+```powershell
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Contoso" -TenantId "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" -ClientId "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+```
+
+A browser sign-in window will appear. Sign in as the assigned assessment account. No consent prompt will appear — the script proceeds directly to data collection.
 
 ---
 
@@ -214,3 +307,4 @@ All files are saved to a timestamped folder in your Downloads directory.
 | `-CustomerName` | String | Customer or organisation name. Used in the output folder name and HTML report header. |
 | `-TenantId` | String | Target tenant ID for partner or delegated access scenarios. |
 | `-QuickMode` | Switch | Runs only Tenant Overview, Licensing, and Secure Score. Useful for a fast pre-sales scan. |
+| `-ClientId` | String | Application (client) ID of a custom app registration in the target tenant. Required when the assessment account is not a Global Admin and the customer has set up a dedicated app registration with pre-consented permissions. See the **Consent and App Registration** section above. |
