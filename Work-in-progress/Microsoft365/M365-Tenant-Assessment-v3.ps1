@@ -140,9 +140,10 @@ function Connect-MicrosoftGraphServices {
         $connectParams = @{ Scopes = $scopes; NoWelcome = $true }
         if ($TenantId)  { $connectParams['TenantId']  = $TenantId }
         if ($ClientId)  { $connectParams['ClientId']  = $ClientId }
-        Connect-MgGraph @connectParams
+        Connect-MgGraph @connectParams -ErrorAction Stop
 
         $ctx = Get-MgContext
+        if (-not $ctx -or -not $ctx.Account) { throw "No Graph session was established (sign-in cancelled or failed)." }
         Write-Host "Connected: $($ctx.Account) -> $($ctx.TenantId)" -ForegroundColor Green
         return $true
     }
@@ -157,7 +158,9 @@ function Connect-ExchangeOnlineIfAvailable {
     if (!(Get-Module -Name ExchangeOnlineManagement -ErrorAction SilentlyContinue)) { return }
     Write-Host "Connecting to Exchange Online..." -ForegroundColor Cyan
     try {
-        $connectParams = @{ ShowBanner = $false }
+        # DisableWAM: the Windows broker (WAM) throws NullReferenceException when no
+        # console window handle is available (e.g. VS Code terminal) — use browser sign-in
+        $connectParams = @{ ShowBanner = $false; DisableWAM = $true }
         if ($TenantId) { $connectParams['DelegatedOrganization'] = $TenantId }
         Connect-ExchangeOnline @connectParams -ErrorAction Stop
         $script:ExchangeConnected = $true
@@ -332,7 +335,7 @@ function Get-SecureScoreInfo {
     Write-SectionHeader "Secure Score" $Total
 
     try {
-        $secureScore = Get-MgSecuritySecureScore | Select-Object -First 1
+        $secureScore = Get-MgSecuritySecureScore -ErrorAction Stop | Select-Object -First 1
         $pct = 0
 
         if ($secureScore) {
@@ -354,7 +357,7 @@ function Get-SecureScoreInfo {
             $script:Data['SecureScorePct'] = $pct
         }
 
-        $controlProfiles = Get-MgSecuritySecureScoreControlProfile
+        $controlProfiles = Get-MgSecuritySecureScoreControlProfile -ErrorAction Stop
         $maxPossible     = [math]::Max(($controlProfiles | Measure-Object -Property MaxScore -Sum).Sum, 1)
         $rankCounter     = 0
 
@@ -425,8 +428,16 @@ function Get-SecureScoreInfo {
         Add-HtmlSection "Secure Score" $html $scoreStatus
     }
     catch {
-        Write-Host "  Error: $_" -ForegroundColor Red
-        Add-HtmlSection "Secure Score" "<p class='error'>Error: $_</p>" "bad"
+        if ("$_" -match 'AADSTS500011') {
+            # The Defender/Security Center service principal has never been provisioned in this tenant
+            $msg = "Secure Score not available: the Microsoft Defender portal has not been initialised in this tenant. Sign in once at https://security.microsoft.com as an admin, wait a few hours, then re-run."
+            Write-Host "  $msg" -ForegroundColor Yellow
+            Add-HtmlSection "Secure Score" "<p class='warn-text'>$msg</p>" "warn"
+        }
+        else {
+            Write-Host "  Error: $_" -ForegroundColor Red
+            Add-HtmlSection "Secure Score" "<p class='error'>Error: $_</p>" "bad"
+        }
     }
 }
 
@@ -439,7 +450,18 @@ function Get-UserHealth {
 
     try {
         Write-Host "  Gathering users..." -ForegroundColor Gray
-        $users = Get-MgUser -All -Property Id,DisplayName,UserPrincipalName,UserType,AccountEnabled,AssignedLicenses,CreatedDateTime,SignInActivity,Mail
+        # SignInActivity needs Entra ID P1/P2 — without it Graph rejects the whole request (403),
+        # so fall back to fetching users without sign-in data
+        $userProps     = @('Id','DisplayName','UserPrincipalName','UserType','AccountEnabled','AssignedLicenses','CreatedDateTime','Mail')
+        $hasSignInData = $true
+        try {
+            $users = Get-MgUser -All -Property ($userProps + 'SignInActivity') -ErrorAction Stop
+        }
+        catch {
+            Write-Host "  Sign-in activity not available (requires Entra ID P1/P2) — continuing without it" -ForegroundColor Yellow
+            $hasSignInData = $false
+            $users = Get-MgUser -All -Property $userProps -ErrorAction Stop
+        }
 
         $enabledMembers = $users | Where-Object { $_.AccountEnabled -and $_.UserType -eq 'Member' }
         $guestUsers     = $users | Where-Object { $_.UserType -eq 'Guest' }
@@ -450,10 +472,12 @@ function Get-UserHealth {
         $ninetyDaysAgo = (Get-Date).AddDays(-90)
         $newUsers      = ($users | Where-Object { $_.CreatedDateTime -gt $thirtyDaysAgo }).Count
 
-        $inactive = ($enabledMembers | Where-Object {
-            $_.SignInActivity.LastSignInDateTime -and
-            $_.SignInActivity.LastSignInDateTime -lt $ninetyDaysAgo
-        }).Count
+        $inactive = if ($hasSignInData) {
+            ($enabledMembers | Where-Object {
+                $_.SignInActivity.LastSignInDateTime -and
+                $_.SignInActivity.LastSignInDateTime -lt $ninetyDaysAgo
+            }).Count
+        } else { 'N/A' }
 
         Write-Host "  Gathering admin roles..." -ForegroundColor Gray
         $adminRoles = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -518,7 +542,7 @@ function Get-UserHealth {
                 (New-StatCard "Licensed" $licensedUsers) +
                 (New-StatCard "Disabled Accounts" ($users.Count - $enabledMembers.Count - $guestUsers.Count) "#767676") +
                 (New-StatCard "New (30 days)" $newUsers) +
-                (New-StatCard "Inactive (90 days)" $inactive $(if ($inactive -gt 10) { "#ff8c00" } else { "#107c10" })) +
+                (New-StatCard "Inactive (90 days)" $inactive $(if (-not $hasSignInData) { "#767676" } elseif ($inactive -gt 10) { "#ff8c00" } else { "#107c10" })) +
                 (New-StatCard "Global Admins" $globalAdmins $adminColor) +
                 "</div>" +
                 "<h3>Global Administrators ($globalAdmins)</h3>" +
@@ -1272,7 +1296,7 @@ Required : Global Reader (minimum)
     $reportPath = New-HtmlReport -OutputPath $outputPath
 
     Write-Host "`nDisconnecting..." -ForegroundColor Cyan
-    Disconnect-MgGraph -ErrorAction SilentlyContinue
+    Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
     if ($script:ExchangeConnected) {
         Disconnect-ExchangeOnline -Confirm:$false -ErrorAction SilentlyContinue
     }
