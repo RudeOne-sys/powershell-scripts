@@ -53,10 +53,10 @@ All three are read-only. A customer's admin can grant these in **Entra admin cen
 
 ```powershell
 # Full assessment
-.\M365TenantAssessment.ps1 -CustomerName "Contoso"
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Contoso"
 
 # Quick scan only (Tenant Overview, Licensing, Secure Score)
-.\M365TenantAssessment.ps1 -CustomerName "Contoso" -QuickMode
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Contoso" -QuickMode
 ```
 
 A browser window will open asking you to sign in. Once authenticated, the script runs unattended.
@@ -76,7 +76,7 @@ The customer:
 
 You then run:
 ```powershell
-.\M365TenantAssessment.ps1 -CustomerName "Potential Customer Ltd"
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Potential Customer Ltd"
 ```
 Sign in with your own email when the browser prompt appears — Microsoft will authenticate you into their tenant via the guest invite.
 
@@ -88,7 +88,7 @@ The safest option for a prospect who is not ready to grant you access. Hand them
 
 ```powershell
 # They run this — no parameters needed
-.\M365TenantAssessment.ps1
+.\M365-Tenant-Assessment-v3.ps1
 ```
 
 ---
@@ -97,7 +97,7 @@ The safest option for a prospect who is not ready to grant you access. Hand them
 
 If you have a Microsoft Partner relationship (CSP or GDAP) with the customer:
 ```powershell
-.\M365TenantAssessment.ps1 -CustomerName "Fabrikam" -TenantId "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+.\M365-Tenant-Assessment-v3.ps1 -CustomerName "Fabrikam" -TenantId "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 Sign in with your partner account when prompted. The `-TenantId` parameter directs both Microsoft Graph and Exchange Online to authenticate into the customer's tenant rather than your own.
 
