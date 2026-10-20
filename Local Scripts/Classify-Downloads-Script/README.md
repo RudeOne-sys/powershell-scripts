@@ -145,7 +145,7 @@ Files that can't be confidently classified land in `_Unclear` for you to handle 
 In the script, find this line and swap in a different [Claude model](https://docs.anthropic.com/en/docs/about-claude/models/overview):
 
 ```powershell
-$Model = "claude-sonnet-4-20250514"
+$Model = "claude-sonnet-4-6"
 ```
 
 ### Adjust batch size
